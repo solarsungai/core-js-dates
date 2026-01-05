@@ -153,8 +153,19 @@ function isDateInPeriod(date, { start, end }) {
  * '1999-01-05T02:20:00.000Z' => '1/5/1999, 2:20:00 AM'
  * '2010-12-15T22:59:00.000Z' => '12/15/2010, 10:59:00 PM'
  */
-function formatDate(/* date */) {
-  throw new Error('Not implemented');
+function formatDate(date) {
+  const dateObject = new Date(date);
+  const hoursUTC = dateObject.getUTCHours();
+  const minutesUTC = String(dateObject.getUTCMinutes()).padStart(2, '0');
+  const secondsUTC = String(dateObject.getUTCSeconds()).padStart(2, '0');
+  const period = hoursUTC >= 12 ? 'PM' : 'AM';
+
+  const month = dateObject.getUTCMonth() + 1;
+  const day = dateObject.getUTCDate();
+  const year = dateObject.getUTCFullYear();
+  const hours12 = hoursUTC % 12 || 12;
+
+  return `${month}/${day}/${year}, ${hours12}:${minutesUTC}:${secondsUTC} ${period}`;
 }
 
 /**
@@ -169,8 +180,16 @@ function formatDate(/* date */) {
  * 12, 2023 => 10
  * 1, 2024 => 8
  */
-function getCountWeekendsInMonth(/* month, year */) {
-  throw new Error('Not implemented');
+function getCountWeekendsInMonth(month, year) {
+  const totalDaysInMonth = new Date(year, month, 0).getDate();
+  let weekendCount = 0;
+
+  for (let dayOfMonth = 1; dayOfMonth <= totalDaysInMonth; dayOfMonth += 1) {
+    const currentDate = new Date(year, month - 1, dayOfMonth);
+    const dayOfWeek = currentDate.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) weekendCount += 1;
+  }
+  return weekendCount;
 }
 
 /**
@@ -186,8 +205,16 @@ function getCountWeekendsInMonth(/* month, year */) {
  * Date(2024, 0, 31) => 5
  * Date(2024, 1, 23) => 8
  */
-function getWeekNumberByDate(/* date */) {
-  throw new Error('Not implemented');
+function getWeekNumberByDate(date) {
+  const utcDate = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
+  const dayOfWeekISO = utcDate.getUTCDay() === 0 ? 7 : utcDate.getUTCDay();
+  utcDate.setUTCDate(utcDate.getUTCDate() + 4 - dayOfWeekISO);
+  const firstJanuaryUTC = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1));
+  const differenceInDays = (utcDate - firstJanuaryUTC) / (1000 * 60 * 60 * 24);
+  const weekNumber = Math.ceil((differenceInDays + 1) / 7);
+  return weekNumber;
 }
 
 /**
@@ -216,8 +243,10 @@ function getNextFridayThe13th(/* date */) {
  * Date(2024, 5, 1) => 2
  * Date(2024, 10, 10) => 4
  */
-function getQuarter(/* date */) {
-  throw new Error('Not implemented');
+function getQuarter(date) {
+  const monthNumber = date.getMonth();
+  const quarterNumber = Math.floor(monthNumber / 3) + 1;
+  return quarterNumber;
 }
 
 /**
@@ -254,8 +283,12 @@ function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
  * Date(2022, 2, 1) => false
  * Date(2020, 2, 1) => true
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  const yearNumber = date.getFullYear();
+  const divisibleBy4 = yearNumber % 4 === 0;
+  const divisibleBy100 = yearNumber % 100 === 0;
+  const divisibleBy400 = yearNumber % 400 === 0;
+  return divisibleBy4 && (!divisibleBy100 || divisibleBy400);
 }
 
 module.exports = {
